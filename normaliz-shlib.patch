@@ -1,0 +1,142 @@
+--- ./source/Makefile.configuration.orig	2013-05-10 06:15:14.000000000 -0600
++++ ./source/Makefile.configuration	2013-10-22 20:00:00.000000000 -0600
+@@ -4,8 +4,8 @@
+ CXX = g++ 
+ #CXX = linux32 g++ -m32 -march=i686  #compile it for linux32
+ CXXFLAGS += -std=c++0x
+-CXXFLAGS += -Wall -pedantic
+-CXXFLAGS += -O3 -funroll-loops
++#CXXFLAGS += -Wall -pedantic
++#CXXFLAGS += -O3 -funroll-loops
+ #CXXFLAGS += -I /usr/local/boost_1_45_0
+ #CXXFLAGS += -g       ## debugging
+ #CXXFLAGS += -pg      ## profiling
+--- ./source/libnormaliz/HilbertSeries.cpp.orig	2013-04-17 05:16:06.000000000 -0600
++++ ./source/libnormaliz/HilbertSeries.cpp	2013-10-22 20:00:00.000000000 -0600
+@@ -31,6 +31,7 @@
+ namespace libnormaliz {
+ using std::cout; using std::endl; using std::flush;
+ 
++#ifndef HILBERT_NON_TEMPLATE
+ long lcm_of_keys(const map<long, denom_t>& m){
+     long l = 1;
+     map<long, denom_t>::const_iterator it;
+@@ -398,7 +399,7 @@ ostream& operator<< (ostream& out, const
+     out << " )" << std::endl;
+     return out;
+ }
+-
++#endif
+ 
+ 
+ //---------------------------------------------------------------------------
+--- ./source/libnormaliz/libnormaliz-templated.cpp.orig	2013-04-17 05:16:06.000000000 -0600
++++ ./source/libnormaliz/libnormaliz-templated.cpp	2013-10-22 20:00:00.000000000 -0600
+@@ -27,6 +27,8 @@
+ #include "full_cone.cpp"
+ #include "cone_dual_mode.cpp"
+ #include "cone.cpp"
++#define HILBERT_NON_TEMPLATE
++#include "HilbertSeries.cpp"
+ 
+ namespace libnormaliz {
+ 
+@@ -68,4 +70,47 @@ template ostream& operator<< <long>(ostr
+ template ostream& operator<< <long long>(ostream& out, const vector<long long>& v);
+ template ostream& operator<< <mpz_class>(ostream& out, const vector<mpz_class>& v);
+ 
++template void poly_add_to<long>(vector<long>& a, const vector<long>& b);
++template void poly_add_to<long long>(vector<long long>& a, const vector<long long>& b);
++template void poly_add_to<mpz_class>(vector<mpz_class>& a, const vector<mpz_class>& b);
++
++template void poly_sub_to<long>(vector<long>& a, const vector<long>& b);
++template void poly_sub_to<long long>(vector<long long>& a, const vector<long long>& b);
++template void poly_sub_to<mpz_class>(vector<mpz_class>& a, const vector<mpz_class>& b);
++
++template vector<long> poly_mult<long>(const vector<long>& a, const vector<long>& b);
++template vector<long long> poly_mult<long long>(const vector<long long>& a, const vector<long long>& b);
++template vector<mpz_class> poly_mult<mpz_class>(const vector<mpz_class>& a, const vector<mpz_class>& b);
++
++template void poly_mult_to<long>(vector<long>& a, long d, long e = 1);
++template void poly_mult_to<long long>(vector<long long>& a, long d, long e = 1);
++template void poly_mult_to<mpz_class>(vector<mpz_class>& a, long d, long e = 1);
++
++template void poly_div<long>(vector<long>& q, vector<long>& r, const vector<long>& a, const vector<long>& b);
++template void poly_div<long long>(vector<long long>& q, vector<long long>& r, const vector<long long>& a, const vector<long long>& b);
++template void poly_div<mpz_class>(vector<mpz_class>& q, vector<mpz_class>& r, const vector<mpz_class>& a, const vector<mpz_class>& b);
++
++template void remove_zeros<long>(vector<long>& a);
++template void remove_zeros<long long>(vector<long long>& a);
++template void remove_zeros<mpz_class>(vector<mpz_class>& a);
++
++template vector<long> cyclotomicPoly<long>(long n);
++template vector<long long> cyclotomicPoly<long long>(long n);
++template vector<mpz_class> cyclotomicPoly<mpz_class>(long n);
++
++template vector<long> coeff_vector<long>(size_t i);
++template vector<long long> coeff_vector<long long>(size_t i);
++template vector<mpz_class> coeff_vector<mpz_class>(size_t i);
++
++template void linear_substitution<long>(vector<long>& poly, const long& a);
++template void linear_substitution<long long>(vector<long long>& poly, const long long& a);
++template void linear_substitution<mpz_class>(vector<mpz_class>& poly, const mpz_class& a);
++
++template vector<long> compute_e_vector<long>(vector<long> h_vector, int dim);
++template vector<long long> compute_e_vector<long long>(vector<long long> h_vector, int dim);
++template vector<mpz_class> compute_e_vector<mpz_class>(vector<mpz_class> h_vector, int dim);
++
++template vector<long> compute_polynomial<long>(vector<long> h_vector, int dim);
++template vector<long long> compute_polynomial<long long>(vector<long long> h_vector, int dim);
++template vector<mpz_class> compute_polynomial<mpz_class>(vector<mpz_class> h_vector, int dim);
+ }
+--- ./source/libnormaliz/Makefile.orig	2013-03-21 09:30:36.000000000 -0600
++++ ./source/libnormaliz/Makefile	2013-10-22 20:00:00.000000000 -0600
+@@ -5,8 +5,9 @@ include ../Makefile.configuration
+ 
+ LIBSOURCES = $(wildcard *.cpp)
+ LIBHEADERS = $(wildcard *.h)
++CXXFLAGS += -fPIC
+ 
+-default: libnormaliz.a
++default: libnormaliz.so
+ 
+ all: default
+ 
+@@ -25,8 +26,14 @@ libnormaliz-templated.o: $(LIBHEADERS) $
+ libnormaliz.a: cone_property.o hilbert_series.o libnormaliz-templated.o
+ 	ar -cr $@ $^
+ 
++libnormaliz.so: cone_property.o hilbert_series.o libnormaliz-templated.o
++	$(CXX) $(CXXFLAGS) $(NORMFLAGS) -shared -o libnormaliz.so.$(VERSION) \
++	-Wl,-h,libnormaliz.so.$(VERSION) $^ -lgmpxx -lgmp
++	ln -s libnormaliz.so.$(VERSION) libnormaliz.so.$(MAJOR)
++	ln -s libnormaliz.so.$(MAJOR) $@
++
+ clean:
+ 	-rm -f *.o
+-	-rm -f libnormaliz.a
++	-rm -f libnormaliz.a libnormaliz.so*
+ 
+ .PHONY : default clean all
+--- ./source/Makefile.orig	2013-03-28 09:13:56.000000000 -0600
++++ ./source/Makefile	2013-10-22 20:00:00.000000000 -0600
+@@ -16,8 +16,8 @@ all: lib normaliz normaliz1
+ linknormaliz: lib
+ 	@$(MAKE) normaliz
+ 
+-normaliz: $(SOURCES) $(HEADERS) libnormaliz/libnormaliz.a
+-	$(CXX) $(CXXFLAGS) $(NORMFLAGS) Normaliz.cpp libnormaliz/libnormaliz.a $(GMPFLAGS) -o normaliz
++normaliz: $(SOURCES) $(HEADERS) libnormaliz/libnormaliz.so
++	$(CXX) $(CXXFLAGS) $(NORMFLAGS) Normaliz.cpp -L libnormaliz -lnormaliz $(GMPFLAGS) -o normaliz
+ 
+ normaliz1: $(SOURCES) $(HEADERS) $(LIBHEADERS) $(LIBSOURCES)
+ 	$(CXX) $(CXXFLAGS) $(NORMFLAGS) Normaliz-impl.cpp $(GMPFLAGS) -o normaliz1
+@@ -29,7 +29,7 @@ normaliz-pg: $(SOURCES) $(HEADERS) $(LIB
+ #always go down the directory and let the make there check what has to be done
+ .PHONY : lib
+ lib:
+-	$(MAKE) --directory=libnormaliz libnormaliz.a
++	$(MAKE) --directory=libnormaliz libnormaliz.so
+ 
+ 
+ .PHONY : clean
