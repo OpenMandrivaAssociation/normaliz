@@ -19,6 +19,10 @@ BuildRequires:  apache-commons-exec-javadoc
 BuildRequires:  appframework
 BuildRequires:  boost-devel
 BuildRequires:  gmp-devel
+%if 0%{?fedora}
+%else
+BuildRequires:  gmpxx-devel
+%endif
 BuildRequires:  java-devel >= 1:1.6.0
 BuildRequires:  javasysmon
 BuildRequires:  jpackage-utils
