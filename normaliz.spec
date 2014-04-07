@@ -22,6 +22,7 @@ BuildRequires:  gmp-devel
 %if 0%{?fedora}
 %else
 BuildRequires:  gmpxx-devel
+BuildRequires:  gomp-devel
 %endif
 BuildRequires:  java-devel >= 1:1.6.0
 BuildRequires:  javasysmon
