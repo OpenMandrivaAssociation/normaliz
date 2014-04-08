@@ -1,7 +1,7 @@
 %{?_javapackages_macros:%_javapackages_macros}
 Name:           normaliz
 Version:        2.10.1
-Release:        2.0%{?dist}
+Release:        2.1%{?dist}
 Summary:        A tool for mathematical computations
 
 License:        GPLv3+
@@ -148,9 +148,7 @@ cp -p source/jNormaliz/dist/jNormaliz.jar %{buildroot}%{_javadir}
 mkdir -p %{buildroot}%{_javadocdir}
 cp -a source/jNormaliz/dist/javadoc %{buildroot}%{_javadocdir}/jnormaliz
 
-%post -n libnormaliz -p /sbin/ldconfig
-
-%postun -n libnormaliz -p /sbin/ldconfig
+chmod a+r %{buildroot}%{_includedir}/libnormaliz/
 
 %files
 %doc source/COPYING
