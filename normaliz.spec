@@ -1,7 +1,7 @@
 %{?_javapackages_macros:%_javapackages_macros}
 Name:           normaliz
 Version:        2.10.1
-Release:        2.2%{?dist}
+Release:        2.3%{?dist}
 Summary:        A tool for mathematical computations
 
 License:        GPLv3+
@@ -41,6 +41,11 @@ in particular you may find Normaliz%{version}Documentation.pdf useful.
 
 %package -n libnormaliz
 Summary:        Normaliz internals as a library
+%ifarch x86_64 aarch64
+Provides:	libnormaliz.so.2.10()(64bit)
+%else
+Provides:	libnormaliz.so.2.10
+%endif
 
 %description -n libnormaliz
 This package contains the normaliz internals as a library, often called
