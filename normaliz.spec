@@ -5,7 +5,7 @@ Release:        2.3%{?dist}
 Summary:        A tool for mathematical computations
 
 License:        GPLv3+
-URL:            http://www.mathematik.uni-osnabrueck.de/normaliz/
+URL:            https://www.mathematik.uni-osnabrueck.de/normaliz/
 # Warning: This zip-ball contains .jar binaries, source only zip-ball not
 # available
 Source0:        http://www.mathematik.uni-osnabrueck.de/normaliz/Normaliz%{version}/Normaliz%{version}.zip
