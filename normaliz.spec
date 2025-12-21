@@ -13,6 +13,7 @@ Source0:        http://www.mathematik.uni-osnabrueck.de/normaliz/Normaliz%{versi
 # library, and link the normaliz binary with the shared library
 Patch0:         %{name}-shlib.patch
 
+BuildRequires:	make
 BuildRequires:  ant
 BuildRequires:  apache-commons-exec
 BuildRequires:  apache-commons-exec-javadoc
